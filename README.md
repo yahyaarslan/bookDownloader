@@ -28,5 +28,4 @@ This will create an "output.pdf" file in the same directory.
 
 ## Limitations
 + Large PDF files consume large memory, mainly a bootleneck caused by when fpdf has to output the actual PDF file (from RAM). Likely to be solved by handling large PDFs in batches.
-+ Furthermore each image file is downloaded separately, where as a batch of images could be requested all at once, speeding up the process.
 + No verbose option to see more logging of where the program is.
