@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 # from rich.traceback import install
+=======
+>>>>>>> 1a6fc2c (added image batch download. still bottleneck at writing to pdf.)
 import re
 import requests
 from PIL import Image, UnidentifiedImageError
@@ -6,8 +9,12 @@ from fpdf import FPDF
 from io import BytesIO
 import os
 import shutil
+<<<<<<< HEAD
 
 # install()
+=======
+from concurrent.futures import ThreadPoolExecutor
+>>>>>>> 1a6fc2c (added image batch download. still bottleneck at writing to pdf.)
 
 
 # Context manager for handling temporary directory
@@ -23,6 +30,19 @@ class TempDirectory:
         shutil.rmtree(self.path)
 
 
+<<<<<<< HEAD
+=======
+def download_image(url, image_path):
+    try:
+        response = requests.get(url)
+        image = Image.open(BytesIO(response.content))
+        image.save(image_path)
+        return image_path
+    except (requests.exceptions.RequestException, IOError, UnidentifiedImageError) as e:
+        print(f"Error occurred: {e}")
+
+
+>>>>>>> 1a6fc2c (added image batch download. still bottleneck at writing to pdf.)
 # Read and format the URLs in a single step
 print("Formatting URLs...")
 with open("unformatted_links.txt", "r") as file:
@@ -35,6 +55,7 @@ with TempDirectory("images") as dirpath:
     # Create a PDF object
     pdf = FPDF()
 
+<<<<<<< HEAD
     # Download each image, process it, and add it to the PDF
     print("Downloading images...")
     for i, url in enumerate(urls):
@@ -55,6 +76,22 @@ with TempDirectory("images") as dirpath:
             UnidentifiedImageError,
         ) as e:
             print(f"Error occurred: {e}")
+=======
+    # Download each image concurrently, process it, and add it to the PDF
+    print("Downloading images...")
+    with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust max_workers as needed
+        futures = []
+        for i, url in enumerate(urls):
+            image_path = f"{dirpath}/image{i}.jpg"
+            futures.append(executor.submit(download_image, url, image_path))
+
+        for future in futures:
+            image_path = future.result()
+            if image_path:
+                # Add the image to the PDF
+                pdf.add_page()
+                pdf.image(image_path, x=0, y=0, w=pdf.w, h=pdf.h)
+>>>>>>> 1a6fc2c (added image batch download. still bottleneck at writing to pdf.)
 
     # Write the PDF to a file
     print("Writing PDF...")
