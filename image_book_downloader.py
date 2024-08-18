@@ -7,8 +7,9 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from tempfile import TemporaryDirectory
 
-def download_image(url):
+def download_image(url, index):
     try:
+        print(f"Downloading image {index + 1}/{len(urls)}: {url}")
         response = requests.get(url)
         image = Image.open(BytesIO(response.content))
         image_bytes = BytesIO()
@@ -16,7 +17,7 @@ def download_image(url):
         image_bytes.seek(0)  # Move the cursor to the beginning of the BytesIO object
         return image_bytes
     except (requests.exceptions.RequestException, IOError, UnidentifiedImageError) as e:
-        print(f"Error occurred: {e}")
+        print(f"Error occurred while downloading {url}: {e}")
         return None
 
 # Read and format the URLs
@@ -32,7 +33,7 @@ with TemporaryDirectory() as temp_dir:
     # Download each image concurrently, process it, and add it to the PDF
     print("Downloading images...")
     with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust max_workers as needed
-        futures = [executor.submit(download_image, url) for url in urls]
+        futures = [executor.submit(download_image, url, i) for i, url in enumerate(urls)]
 
         for i, future in enumerate(futures):
             image_bytes = future.result()
@@ -45,7 +46,10 @@ with TemporaryDirectory() as temp_dir:
                 # Add the image to the PDF
                 pdf.add_page()
                 pdf.image(temp_path, x=0, y=0, w=pdf.w, h=pdf.h)
+                print(f"Added page {i + 1}/{len(urls)} to the PDF.")
 
 # Write the PDF to a file
 print("Writing PDF...")
 pdf.output("output.pdf", "F")
+print(f"PDF creation complete. Total pages: {len(urls)}")
+
